@@ -1,0 +1,137 @@
+HTML
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五年级 RM 钱币练习器</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
+        .container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 10px; }
+        .desc { text-align: center; color: #7f8c8d; margin-bottom: 20px; }
+        .question-item { margin-bottom: 20px; padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; }
+        .q-text { flex: 1; font-size: 1.1em; }
+        .q-input { width: 100px; padding: 8px; border: 2px solid #ddd; border-radius: 6px; font-size: 1em; text-align: right; }
+        .q-input:focus { border-color: #3498db; outline: none; }
+        .controls { text-align: center; margin-top: 30px; }
+        button { padding: 12px 25px; font-size: 1em; cursor: pointer; border: none; border-radius: 8px; transition: 0.3s; margin: 5px; }
+        #submit-btn { background-color: #27ae60; color: white; }
+        #submit-btn:hover { background-color: #219150; }
+        #reset-btn { background-color: #3498db; color: white; }
+        .result-msg { margin-top: 20px; font-weight: bold; text-align: center; font-size: 1.2em; }
+        .correct { background-color: #d4edda; border-color: #c3e6cb; }
+        .wrong { background-color: #f8d7da; border-color: #f5c6cb; }
+        .feedback { font-size: 0.8em; color: #e74c3c; margin-left: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>RM 钱币计算练习</h1>
+    <p class="desc">五年级水平 (加减乘除综合) - 共 15 题</p>
+    
+    <div id="quiz-container">
+        </div>
+
+    <div class="controls">
+        <button id="submit-btn" onclick="checkAnswers()">提交答案</button>
+        <button id="reset-btn" onclick="initQuiz()">重新出题</button>
+    </div>
+
+    <div id="result" class="result-msg"></div>
+</div>
+
+<script>
+    let questionsData = [];
+
+    function generateRandomQuestion() {
+        const ops = ['+', '-', '*', '/'];
+        const op = ops[Math.floor(Math.random() * ops.length)];
+        let qText = '', ans = 0;
+
+        switch(op) {
+            case '+':
+                let a1 = (Math.random() * 50 + 10).toFixed(2);
+                let b1 = (Math.random() * 40 + 5).toFixed(2);
+                qText = `RM${a1} + RM${b1}`;
+                ans = (parseFloat(a1) + parseFloat(b1)).toFixed(2);
+                break;
+            case '-':
+                let a2 = (Math.random() * 100 + 50).toFixed(2);
+                let b2 = (Math.random() * 40 + 1).toFixed(2);
+                qText = `RM${a2} - RM${b2}`;
+                ans = (parseFloat(a2) - parseFloat(b2)).toFixed(2);
+                break;
+            case '*':
+                let a3 = (Math.random() * 15 + 2).toFixed(2);
+                let b3 = Math.floor(Math.random() * 8) + 2;
+                qText = `RM${a3} × ${b3}`;
+                ans = (parseFloat(a3) * b3).toFixed(2);
+                break;
+            case '/':
+                let b4 = Math.floor(Math.random() * 7) + 2;
+                let ansVal = (Math.random() * 10 + 2).toFixed(2);
+                let a4 = (parseFloat(ansVal) * b4).toFixed(2);
+                qText = `RM${a4} ÷ ${b4}`;
+                ans = parseFloat(ansVal).toFixed(2);
+                break;
+        }
+        return { qText, ans };
+    }
+
+    function initQuiz() {
+        const container = document.getElementById('quiz-container');
+        const resultDiv = document.getElementById('result');
+        container.innerHTML = '';
+        resultDiv.innerHTML = '';
+        questionsData = [];
+
+        for (let i = 0; i < 15; i++) {
+            const data = generateRandomQuestion();
+            questionsData.push(data);
+
+            const div = document.createElement('div');
+            div.className = 'question-item';
+            div.innerHTML = `
+                <div class="q-text"><strong>${i+1}.</strong> ${data.qText} = </div>
+                <span>RM <input type="number" step="0.01" class="q-input" id="q${i}"></span>
+                <span id="feedback${i}" class="feedback"></span>
+            `;
+            container.appendChild(div);
+        }
+    }
+
+    function checkAnswers() {
+        let score = 0;
+        questionsData.forEach((data, i) => {
+            const userInput = document.getElementById(`q${i}`).value;
+            const feedback = document.getElementById(`feedback${i}`);
+            const inputField = document.getElementById(`q${i}`);
+            
+            // 转换为两位小数进行比较
+            const formattedInput = parseFloat(userInput).toFixed(2);
+
+            if (formattedInput === data.ans) {
+                score++;
+                inputField.parentElement.parentElement.className = 'question-item correct';
+                feedback.innerHTML = '✓';
+                feedback.style.color = '#27ae60';
+            } else {
+                inputField.parentElement.parentElement.className = 'question-item wrong';
+                feedback.innerHTML = `✗ (正确: RM${data.ans})`;
+                feedback.style.color = '#e74c3c';
+            }
+        });
+
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `得分: ${score} / 15`;
+        if (score === 15) resultDiv.innerHTML += " 🌟 太棒了！全对！";
+    }
+
+    // 页面加载时初始化
+    window.onload = initQuiz;
+</script>
+
+</body>
+</html>
